@@ -1,0 +1,60 @@
+[package]
+name = "mp3-player"
+version = "0.1.0"
+edition = "2024" # 保持你设置的 2024 版
+
+[dependencies]
+# --- 1. 核心 UI 框架 ---
+# Iced 本身。我们启用 "tokio" 特性，让 Iced 的 Command 和 Subscription
+# 能在 Tokio 运行时上工作。
+iced = {version =  "0.13.1", features = ["tokio"] }
+
+
+# --- 2. 异步运行时 ---
+# Iced 严重依赖异步。Tokio 是事实标准。
+# 我们需要它来运行 Command::perform (如扫描文件)
+# 和 Subscription::run (如监听音频事件)。
+# "full" 特性开启了所有功能，包括 MPSC 通道和文件系统。
+tokio = { version = "1", features = ["full"] }
+
+# --- 3. 音频播放引擎 ---
+# Iced 只画 UI，不播放声音。你需要一个音频库。
+# `kira` 是一个非常现代、功能强大的音频库，它为游戏设计，
+# 这意味着它在自己的线程上运行得很好，非常适合与 Iced 的 Command/Subscription 模型集成。
+kira = "0.11"
+
+# `rodio` 是另一个更简单的选择，如果你觉得 `kira` 太复杂。
+# rodio = "0.18.1"
+
+
+# --- 4. 音频元数据 (Tags) ---
+# 如何从 MP3/FLAC/M4A 文件中读取“艺术家”、“专辑”、“标题”和“封面”？
+# `lofty` 是目前 Rust 中最好的库，支持几乎所有格式。
+lofty = "0.22.0"
+
+
+# --- 5. 音乐库数据库 (强烈推荐) ---
+# 你不应该在内存中持有10000首歌的列表。
+# `rusqlite` 允许你使用 SQLite（一个简单的本地文件数据库）来存储
+# 所有的歌曲路径和元数据。
+rusqlite = { version = "0.37.0", features = ["bundled"] }
+
+
+# --- 6. 工具类 (Utilities) ---
+
+# 当用户选择一个文件夹时，你需要递归地扫描它。`walkdir` 是最简单的实现方式。
+walkdir = "2.5.0"
+
+# Iced 没有内置“打开文件夹”对话框。
+# `rfd` (Rust File Dialogs) 提供了跨平台的原生对话框。
+rfd = "0.15"
+
+# (可选) 更好的日志
+# `tracing` 是现代 Rust 的日志标准，尤其擅长异步。
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
+
+# (可选) 更好的错误处理
+# `eyre` (或 `anyhow`) 让你在 main 和 Command 中
+# 可以简单地使用 `Result` 和 `?`，而无需关心具体错误类型。
+eyre = "0.6"
